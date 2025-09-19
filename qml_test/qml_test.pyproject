@@ -1,0 +1,8 @@
+{
+    "files": [
+        "main.py",
+        "App/Main.qml",
+        "App/logo.png",
+        "App/qmldir"
+    ]
+}
