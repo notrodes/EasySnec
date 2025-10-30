@@ -11,7 +11,7 @@ Page {
 
     header: Label {
         color: "#15af15"
-        text: qsTr("Where do people use Qt?")
+        text: "Where do people use Qt?"
         font.pointSize: 17
         font.bold: true
         font.family: "Arial"
@@ -46,6 +46,7 @@ Page {
             }
         }
     }
+    // what does this do?
     NumberAnimation {
         id: anim
         running: true
