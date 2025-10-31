@@ -85,6 +85,84 @@ class MainWindow(QMainWindow):
             result += f"<p><font color=\"red\">Oh no! There was a mistake :(</font></p>"
         return result
 
+    def get_closest_course(self, card_data, courses):
+        # fastDamerauLevenshtein
+        # https://pypi.org/project/fastDamerauLevenshtein/#files
+        s1 = [ punch[0] for punch in card_data['punches'] ]
+        course_distances = {}
+
+        for course in courses:
+            s2 = course_data
+            
+            d: dict[tuple[int, int], int] = {}
+            da: dict[T, int] = {}
+
+            len1 = len(s1)
+            len2 = len(s2)
+
+            maxdist = len1 + len2
+            d[-1, -1] = maxdist
+
+            # matrix
+            for i in range(len(s1) + 1):
+                d[i, -1] = maxdist
+                d[i, 0] = i
+            for j in range(len(s2) + 1):
+                d[-1, j] = maxdist
+                d[0, j] = j
+
+            for i, cs1 in enumerate(s1, start=1):
+                db = 0
+                for j, cs2 in enumerate(s2, start=1):
+                    i1 = da.get(cs2, 0)
+                    j1 = db
+                    if self.test_func(cs1, cs2):
+                        cost = 0
+                        db = j
+                    else:
+                        cost = 1
+
+                    d[i, j] = min(
+                        d[i - 1, j - 1] + cost,     # substitution (wrong station)
+                        d[i, j - 1] + 1,            # insertion (missed station)
+                        d[i - 1, j] + 1,            # deletion (extra station)
+                        d[i1 - 1, j1 - 1] + (i - i1) - 1 + (j - j1),  # transposition (swapped stations)
+                    )
+
+                da[cs1] = i
+
+            course_distances([course]) = d[len1, len2]
+
+        return min(course_distances, key=course_distances.get)
+
+    def get_correctness_of_course(self, card_data, course):
+        # todo: make buffer array that helps display which stations are wrong compared to correct course 
+        # See: triResultatsScore() and getMissed() in ResultatPuce.java from EasyGecNG
+        correctness_array = []
+        punches = [ punch[0] for punch in card_data['punches'] ]
+
+        # temp solution
+        for i in range(len(punches)):
+            if course[i] == punches[i]:
+                correctness_array.append(True)
+            else:
+                correctness_array.append(False)
+
+            # buffer_string = ""
+            # bufferBool = True
+            # unsorted = True
+
+            # while (unsorted):
+            #     unsorted = False
+            #     for i in range(len(punches)):
+            #         if (punches[i] != punches[i + 1]):
+            #             buffer_string = punches[i]
+            #             punches[i] = punches[i + 1]
+            #             punches[i + 1] = buffer_string
+            #             unsorted = True
+        
+        return correctness_array
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     main_window = MainWindow()
