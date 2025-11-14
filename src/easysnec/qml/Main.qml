@@ -4,26 +4,42 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-// import QtCore 2.12
-
+import QtQml
 
 ApplicationWindow {
+    id: root
+
+    // ------- Program State! TODO: Replace with a "Model" / big object that holds all the data
+    // debug value
+    property var currTime: '1'
+
+    // all available ports (possibly filtered)
+    property var portOptions: []
+    // selected port (this is outgoing)
+    property var currPort: 'test'
+
+    // RESULTS
+    property var result_status: false
+    property var result_string: "You did it!" 
+
+    property var image_path: "./resources/glassy-smiley-late.png"
+
+    // ------- Program State!
+
     visible: true
     width: 640
     height: 480
-    property var myModel: '1234'
-    property var currTime: '1'
 
-    // header: Label {
-    //     color: "#15af15"
-    //     text: currTime
-    //     font.pointSize: 17
-    //     font.bold: true
-    //     font.family: "Arial"
-    //     renderType: Text.NativeRendering
-    //     horizontalAlignment: Text.AlignHCenter
-    //     padding: 10
-    // }
+    header: Label {
+        color: "#15af15"
+        text: root.currTime
+        font.pointSize: 17
+        font.bold: true
+        font.family: "Arial"
+        renderType: Text.NativeRendering
+        horizontalAlignment: Text.AlignHCenter
+        padding: 10
+    }
     StackLayout {
         anchors.fill: parent
         
@@ -43,7 +59,7 @@ ApplicationWindow {
                         // anchors.centerIn: root
                         anchors.fill:parent
 
-                        source: "./resources/glassy-smiley-bad.png"
+                        source: root.image_path
                     }
                 }
 
@@ -72,6 +88,16 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                     padding: 10
                 }
+                // Label {
+                //     color: "#15af15"
+                //     // text: root.cardReading
+                //     font.pointSize: 17
+                //     font.bold: true
+                //     font.family: "Arial"
+                //     renderType: Text.NativeRendering
+                //     horizontalAlignment: Text.AlignHCenter
+                //     padding: 10
+                // }
             }
         }
     }

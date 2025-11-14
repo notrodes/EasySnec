@@ -4,9 +4,9 @@ import datetime as dt
 
 import pytest
 
-from easysnec.course import Course
-from easysnec.input_data import InputData
-from easysnec.output_data import OutputData, SuccessStatus
+from easysnec.utils.grading import Course
+from easysnec.utils.grading import InputData
+from easysnec.utils.grading import OutputData, SuccessStatus
 
 
 @pytest.fixture

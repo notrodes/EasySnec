@@ -1,9 +1,15 @@
 # EasySnec
 Python prototype of EasyGecNG.
 
-Instructions to run it: 
+Instructions to run EasySnec: 
 Install [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 ```
-uv run main.py
+uv run easysnec
+```
+
+Instructions to build EasySnec:
+
+```
+./scripts/build.sh
 ```
