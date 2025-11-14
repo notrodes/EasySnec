@@ -42,7 +42,17 @@ ApplicationWindow {
     }
     StackLayout {
         anchors.fill: parent
-        
+        currentIndex: 1
+
+        Page {
+            id: select_page
+
+            ComboBox {
+                model: ["first", "second", "third"]
+                // model: myModel
+            }
+        }
+
         Page {
             id: runPage
 
