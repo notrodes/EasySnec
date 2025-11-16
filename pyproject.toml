@@ -1,6 +1,6 @@
 [project]
 name = "easysnec"
-version = "0.1.0"
+version = "0.1.1"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -16,9 +16,36 @@ dependencies = [
 [project.scripts]
 easysnec = "easysnec.app:main"
 
-[build-system]
-requires = ["uv_build>=0.8.24,<0.9.0"]
-build-backend = "uv_build"
-
 [dependency-groups]
-dev = ["pytest>=8.4.2", "pydantic>=2.12.3"]
+dev = [
+    "pytest>=8.4.2",
+    "pydantic>=2.12.3",
+    "pyapp>=4.16.1",
+]
+
+
+# [build-system]
+# requires = ["uv_build>=0.8.24,<0.9.0"]
+# build-backend = "uv_build"
+
+# https://hatch.pypa.io/latest/plugins/builder/binary/
+# https://github.com/pypa/hatch/issues/1436
+# `uvx hatch build --target binary` makes a binary that windows doesnt eat! it crashes immediately tho
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.envs.build]
+detached = true
+[tool.hatch.envs.build.env-vars]
+PYAPP_DISTRIBUTION_EMBED = "true"
+PYAPP_PROJECT_PATH = "{root}/dist/easysnec.tar.gz"
+PYAPP_UV_ENABLED = "true"
+PYAPP_PYTHON_VERSION = "3.11"
+[tool.hatch.envs.build.scripts]
+# run w `uvx hatch run build:binary
+binary = [
+#  "hatch build -c -t sdist",
+#  "mv {root}/dist/easysnec-*.tar.gz {root}/dist/easysnec.tar.gz",
+ "hatch build -t binary"
+]
