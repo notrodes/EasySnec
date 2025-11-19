@@ -26,13 +26,13 @@ class SuccessStatus(Enum):
 class ScoreType(Enum):
     SCORE_O = 1
     CLASSIC_O = 2
-    ANIMAL_O = 2 # Looks exactly like score-o from our perspective
+    ANIMAL_O = 2 # Looks exactly like classic-o from our perspective. this might be an illegal use of an enum
 
 @dataclass(frozen=True)
 class InputData:
     card_id: int
-    start_time: dt.datetime
-    finish_time: dt.datetime
+    start_time: dt.datetime|None
+    finish_time: dt.datetime|None
     punches: list[tuple[int, dt.datetime]]  # TODO: split into punches and times???
     reading_id: uuid.UUID # TODO: this should be generated internally, and not taken as an arg
 
@@ -77,7 +77,8 @@ class Grade:
 
     @cached_property
     def status(self) -> SuccessStatus:
-        if not (self.input.finish_time and self.input.start_time):
+        if not (self.input.finish_time and self.input.start_time) or \
+            self.input.finish_time < self.input.start_time:
             return SuccessStatus.INCOMPLETE
         elif self.course.stations == self.input.stations:
             return SuccessStatus.SUCCESS
@@ -85,14 +86,20 @@ class Grade:
             return SuccessStatus.MISSES
 
     @cached_property
-    def score(self) -> int:
+    def score(self) -> float:
+        if self.status is SuccessStatus.INCOMPLETE:
+            return 0 
+
         match self.score_type:
             case ScoreType.SCORE_O:
-                # return num matching
-                raise NotImplementedError()
-            case ScoreType.CLASSIC_O,ScoreType.ANIMAL_O:
-                # different scoring method goes here
-                raise NotImplementedError()
+                # return the number of visited stations that are also in the course description 
+                return len(  set(self.course.stations).intersection( set(self.input.stations) ) )
+            case ScoreType.CLASSIC_O | ScoreType.ANIMAL_O:
+                # we care about order. Score is time if you did the course correctly, else 0
+                if self.course.stations == self.input.stations:
+                    return 1 / (self.input.finish_time - self.input.start_time).seconds # ty: ignore[unsupported-operator]
+                else:
+                    return 0
         
         raise ValueError(f"I don't know how to score {self.score_type}")
 

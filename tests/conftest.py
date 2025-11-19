@@ -79,7 +79,7 @@ def example_output_incomplete(example_course: Course) -> OutputData:
 
 
 @pytest.fixture
-def example_input_misses(example_course: Course) -> InputData:
+def example_input_misses() -> InputData:
     start = dt.datetime(2025, 3, 14, 9, 30, 17)
     finish = dt.datetime(2025, 3, 14, 10, 22, 47)
     punches = [
@@ -91,6 +91,35 @@ def example_input_misses(example_course: Course) -> InputData:
         start_time=start,
         finish_time=finish,
         punches=punches,
+        reading_id=uuid.uuid4()
+        # reading_id="202503140930170000000123",
+    )
+@pytest.fixture
+def example_input_no_start() -> InputData:
+    return InputData(
+        card_id=123,
+        start_time = None,
+        finish_time= dt.datetime(2025, 3, 14, 10, 22, 47),
+        punches = [
+            (42, dt.datetime(2025, 3, 14, 9, 37, 2)),
+            (43, dt.datetime(2025, 3, 14, 9, 57, 8)),
+            (49, dt.datetime(2025, 3, 14, 10, 9, 44)),
+        ],
+        reading_id=uuid.uuid4()
+        # reading_id="202503140930170000000123",
+    )
+
+@pytest.fixture
+def example_input_no_finish() -> InputData:
+    return InputData(
+        card_id=123,
+        start_time=dt.datetime(2025, 3, 14, 9, 30, 17),
+        finish_time=None,
+        punches=[
+            (42, dt.datetime(2025, 3, 14, 9, 37, 2)),
+            (43, dt.datetime(2025, 3, 14, 9, 57, 8)),
+            (49, dt.datetime(2025, 3, 14, 10, 9, 44)),
+        ],
         reading_id=uuid.uuid4()
         # reading_id="202503140930170000000123",
     )
