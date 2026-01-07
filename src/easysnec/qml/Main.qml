@@ -146,36 +146,17 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                 }
 
-                ColumnLayout {
-                    Label {
-                        text: "Active Courses:"
-                    }
-                    ListView {
-                        // anchors.fill: parent
-                        width: 180; height: 200
-                        model: ListModel{
-                            ListElement {t:"Course 1"}
-                            ListElement {t:"Course 2"}
-                            ListElement {t:"Course 3"}
-                            ListElement {t:"Course 4"}
-                        }
-
-                        delegate: CheckBox {
-                            checked: true
-                            text: t
-                        }
-                    }
-
-                    Button {
-                        text: "Add Courses"
-                        onClicked: {
-                            backend.log("Hello world. application name is " + backend.name)
-                            // backend.log(backend.name)
-                        }
-                    }
-                }
 
                 RowLayout {
+                    RowLayout {
+                        Label {
+                            text: "Course Set:"
+                        }
+                        ComboBox {
+                            model: ["Builtins", "Load from File"]
+                        }
+                    }
+
                     RowLayout {
                         Label {
                             text: "Scoring Mode:"
