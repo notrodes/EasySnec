@@ -10,13 +10,19 @@ OutputBaseFilename=install_easysnec_{#VersionNo}
 Compression=lzma
 SolidCompression=yes
 
-[Languages]
-Name: "english"; MessagesFile: "compiler:Default.isl"
+; [Languages]
+; Name: "english"; MessagesFile: "compiler:Default.isl"
 [Files]
 Source: "..\dist\binary\easysnec-{#VersionNo}.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\src\easysnec\qml\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
-; [Icons]
-; Name: "{group}\MyApp"; Filename: "{app}\MyApp.exe"
+Source: "icon.ico"; DestDir: "{app}"; Flags: ignoreversion
+
+[Icons]
+; https://www.icoconverter.com/ for making more or less-blurry icons
+Name: "{group}\easysnec"; Filename: "{app}\easysnec-{#VersionNo}.exe"; IconFilename: "{app}\icon.ico"
+
+[Run]
+; Filename: {app}\easysnec-{#VersionNo}.exe; Description: {cm:LaunchProgram,easysnec}; Flags: nowait postinstall skipifsilent
+Filename: {app}\easysnec-{#VersionNo}.exe; Flags: nowait
 ; Name: "{commondesktop}\MyApp"; Filename: "{app}\MyApp.exe"; Tasks: desktopicon
 ; [Tasks]
 ; Name: "desktopicon"; Description: "Create a desktop icon"; GroupDescription: "Additional icons"; Flags: unchecked
