@@ -30,7 +30,11 @@ def main() -> None:
 
     # TODO: This is prob how we embed files in the application
     # https://doc.qt.io/qtforpython-6/tutorials/basictutorial/qrcfiles.html
-    engine.load('./src/easysnec/qml/Main.qml')
+
+    file = Path(__file__).parent / 'qml' / 'Main.qml'
+    # '/qml/Main.qml'
+    log.info(f'loading qml from {file}')
+    engine.load(file)
     if not engine.rootObjects():
         raise RuntimeError('QML Failed to load')
     
