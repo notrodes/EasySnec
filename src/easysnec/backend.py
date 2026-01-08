@@ -7,7 +7,7 @@ from sportident import SIReaderReadout, SIReaderCardChanged, SIReaderException
 
 from PySide6.QtCore import QStringListModel, QTimer, QThread, QObject, Signal,Slot,Property,PyClassProperty, QTimerEvent
 
-from .utils.grading import COURSES, InputData, Grade, ScoreType
+from .utils.grading import COURSES, InputData, Grade, ScoreType, EMOJI_MAPPING
 
 from functools import partial
 
@@ -199,6 +199,15 @@ class Backend:
                     # if incorrect, ready the scoring output and feedback messages
                     missing_checkpoints = [station for station in best_guess_course.stations if station not in input_data.stations]
                     extra_checkpoints = [station for station in input_data.stations if station not in best_guess_course.stations]
+
+                    # TODO: if animal_o:
+                    # change relevant checkpoints into respective animal emoji
+                    for i in range(len(missing_checkpoints)):
+                        if missing_checkpoints[i] in EMOJI_MAPPING:
+                            missing_checkpoints[i] = EMOJI_MAPPING[missing_checkpoints[i]]
+                    for i in range(len(extra_checkpoints)):
+                        if extra_checkpoints[i] in EMOJI_MAPPING:
+                            extra_checkpoints[i] = EMOJI_MAPPING[missing_checkpoints[i]]
 
                     scoring_output = ""
                     if missing_checkpoints:

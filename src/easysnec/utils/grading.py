@@ -165,4 +165,17 @@ ANIMAL_MAPPING = {
     'Crab': 39,
 }
 
+EMOJI_MAPPING = {
+    32: "🐸",
+    34: "🐙",
+    38: "🐧",
+    40: "🐑",
+    31: "🦁",
+    33: "🐕",
+    35: "🐝",
+    36: "🐦",
+    37: "🐘",
+    39: "🦀",
+}
+
 CURRENT_COURSE = COURSES[9] # Crab
