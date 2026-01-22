@@ -59,13 +59,14 @@ class BackendInterface(QObject):
         log.warning('nice it worked')
 
 
-    # --- ports property (r)
-    def get_ports(self):
-        #TODO: refresh ports list occasionally
-        return self._ports
+    # --- ports property (rw)
     portsChanged = Signal(QObject)
+    def set_ports(self, new_ports):
+        self._ports = new_ports
+        self.portsChanged.emit(new_ports)
+    def get_ports(self):
+        return self._ports
     ports = Property(QObject, get_ports, notify=portsChanged) # ty: ignore[invalid-argument-type]
-
     # --- time property (rw)
     _time = "the time is now"
     timeChanged = Signal(str)
@@ -118,6 +119,14 @@ class Backend:
 
         self.test_timer = QTimer(singleShot=True, interval=1000)
         self.test_timer.timeout.connect( partial(self.big_test, engine=engine) )
+
+        # create our ports list
+        def update_ports():
+            curr_ports = QStringListModel([port.device for port in serial.tools.list_ports.comports()])
+            self.backend_interface.set_ports(curr_ports)
+
+        self.timer_ports = QTimer(interval=1000)
+        self.timer_ports.timeout.connect(update_ports)
         
     def start(self):
         self.backend_interface.backend_started.emit()
@@ -202,7 +211,6 @@ class Backend:
                     missing_checkpoints = [station for station in best_guess_course.stations if station not in input_data.stations]
                     extra_checkpoints = [station for station in input_data.stations if station not in best_guess_course.stations]
 
-                    # TODO: if animal_o:
                     # change relevant checkpoints into respective animal emoji
                     for i in range(len(missing_checkpoints)):
                         if missing_checkpoints[i] in EMOJI_MAPPING:
