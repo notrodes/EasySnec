@@ -8,7 +8,7 @@ from sportident import SIReaderReadout, SIReaderCardChanged, SIReaderException
 
 from PySide6.QtCore import QStringListModel, QTimer, QThread, QObject, Signal,Slot,Property,PyClassProperty, QTimerEvent
 
-from .utils.grading import COURSES, InputData, Grade, ScoreType, EMOJI_MAPPING
+from .utils.grading import COURSES, InputData, Grade
 
 from functools import partial
 
@@ -190,40 +190,19 @@ class Backend:
                 # beep
                 self.si.ack_sicard()
                 
-                # grade response
-                # runner_correct = get_correctness_of_course(card_data, CURRENT_COURSE.stations)
-                # runner_correct = input_data.score_against(CURRENT_COURSE)
-                
                 # when multiple courses are available, get_closest_course before grading
                 best_guess_course = input_data.get_closest_course(COURSES)
-                runner_correct = input_data.score_against(best_guess_course)
+                runner_grade = input_data.score_against(best_guess_course)
 
-                # Grade(input_data, best_guess_course, ScoreType.ANIMAL_O).score
-                log.info("Correctness: " + pprint.pformat(runner_correct))
+                log.info("Correctness: " + pprint.pformat(runner_grade.status))
                 
                 # Put stuff in the UI
-                if runner_correct:
+                if runner_grade.status == SuccessStatus.SUCCESS:
                     self.engine.rootObjects()[0].setProperty('image_path', './resources/glassy-smiley-good-green.png')
-                    self.engine.rootObjects()[0].setProperty('scoring_output', "")
                     self.engine.rootObjects()[0].setProperty('feedback_message', "")
-                else:
-                    # if incorrect, ready the scoring output and feedback messages
-                    missing_checkpoints = [station for station in best_guess_course.stations if station not in input_data.stations]
-                    extra_checkpoints = [station for station in input_data.stations if station not in best_guess_course.stations]
-
-                    # change relevant checkpoints into respective animal emoji
-                    for i in range(len(missing_checkpoints)):
-                        if missing_checkpoints[i] in EMOJI_MAPPING:
-                            missing_checkpoints[i] = EMOJI_MAPPING[missing_checkpoints[i]]
-                    for i in range(len(extra_checkpoints)):
-                        if extra_checkpoints[i] in EMOJI_MAPPING:
-                            extra_checkpoints[i] = EMOJI_MAPPING[missing_checkpoints[i]]
-
-                    scoring_output = ""
-                    if missing_checkpoints:
-                        scoring_output += "Missing checkpoints: " + ", ".join(missing_checkpoints) + "\n"
-                    if extra_checkpoints:
-                        scoring_output += "Extra checkpoints: " + ", ".join(extra_checkpoints)
+                elif runner_grade.status == SuccessStatus.MISSES:
                     self.engine.rootObjects()[0].setProperty('image_path', './resources/glassy-smiley-bad.png')
-                    self.engine.rootObjects()[0].setProperty('scoring_output', scoring_output)
                     self.engine.rootObjects()[0].setProperty('feedback_message', "Try again!")
+                elif runner_grade.status == SuccessStatus.INCOMPLETE:
+                    self.engine.rootObjects()[0].setProperty('image_path', './resources/glassy-smiley-surprised.png')
+                self.engine.rootObjects()[0].setProperty('scoring_output', runner_grade.scoring_output)

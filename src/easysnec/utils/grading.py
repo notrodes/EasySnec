@@ -58,29 +58,22 @@ class InputData:
         return min(courses, key=lambda course: damerau_levenshtein_distance(self.stations, course.stations))
 
     
-    def score_against(self, course:Course):
-        #TODO: make buffer array that helps display which stations are wrong compared to correct course 
-        # See: triResultatsScore() and getMissed() in ResultatPuce.java from EasyGecNG
-
-        # temp solution
-        return course.stations == self.stations
-
-        # actual solution
-        return Grade(self, course)
+    def score_against(self, course:Course, score_type:ScoreType=2):
+        return Grade(self, course, score_type)
 
 
 @dataclass(frozen=True)
 class Grade:
-    input: InputData
+    input_data: InputData
     course: Course
     score_type: ScoreType
 
     @cached_property
     def status(self) -> SuccessStatus:
-        if not (self.input.finish_time and self.input.start_time) or \
-            self.input.finish_time < self.input.start_time:
+        if not (self.input_data.finish_time and self.input_data.start_time) or \
+            self.input_data.finish_time < self.input_data.start_time:
             return SuccessStatus.INCOMPLETE
-        elif self.course.stations == self.input.stations:
+        elif self.course.stations == self.input_data.stations:
             return SuccessStatus.SUCCESS
         else:
             return SuccessStatus.MISSES
@@ -93,12 +86,13 @@ class Grade:
         match self.score_type:
             case ScoreType.SCORE_O:
                 # return the number of visited stations that are also in the course description 
-                return len(  set(self.course.stations).intersection( set(self.input.stations) ) )
+                return len(  set(self.course.stations).intersection( set(self.input_data.stations) ) )
             case ScoreType.CLASSIC_O | ScoreType.ANIMAL_O:
                 # we care about order. Score is time if you did the course correctly, else 0
-                if self.course.stations == self.input.stations:
-                    return 1 / (self.input.finish_time - self.input.start_time).seconds # ty: ignore[unsupported-operator]
+                if self.course.stations == self.input_data.stations:
+                    return 1 / (self.input_data.finish_time - self.input_data.start_time).seconds # ty: ignore[unsupported-operator]
                 else:
+                # TODO: see triResultatsScore() and getMissed() in ResultatPuce.java from EasyGecNG
                     return 0
         
         raise ValueError(f"I don't know how to score {self.score_type}")
@@ -108,21 +102,33 @@ class Grade:
     def missed_checkpoints(self) -> list[int]:
         if self.status is SuccessStatus.SUCCESS:
             return []
-        # find missed checkpoints
-        raise NotImplementedError
-        
-        # buffer_string = ""
-        # bufferBool = True
-        # unsorted = True
+        missed_checkpoints = [station for station in course.stations if station not in input_data.stations]
+        return [EMOJI_MAPPING[checkpoint] for checkpoint in missed_checkpoints if checkpoint in EMOJI_MAPPING else checkpoint]
 
-        # while (unsorted):
-        #     unsorted = False
-        #     for i in range(len(punches)):
-        #         if (punches[i] != punches[i + 1]):
-        #             buffer_string = punches[i]
-        #             punches[i] = punches[i + 1]
-        #             punches[i + 1] = buffer_string
-        #             unsorted = True
+    @cached_property
+    def extra_checkpoints(self) -> list[int]:
+        if self.status is SuccessStatus.SUCCESS:
+            return []
+        extra_checkpoints = [station for station in input_data.stations if station not in course.stations]
+        return [EMOJI_MAPPING[checkpoint] for checkpoint in extra_checkpoints if checkpoint in EMOJI_MAPPING else checkpoint]
+
+    @cached_property
+    def scoring_output(self) -> str:
+        match self.status:
+            case SuccessStatus.SUCCESS:
+                scoring_output = ""
+            case SuccessStatus.MISSES:
+                scoring_output = ""
+                    if self.missed_checkpoints:
+                        scoring_output += "Missing checkpoints: " + ", ".join(self.missed_checkpoints) + "\n"
+                    if self.extra_checkpoints:
+                        scoring_output += "Extra checkpoints: " + ", ".join(self.extra_checkpoints)
+            case SuccessStatus.INCOMPLETE:
+                scoring_output = "Missing start or finish checkpoint!"
+            case _:
+                scoring_output = ""
+
+        return scoring_output
 
 
 @dataclass(frozen=True)
