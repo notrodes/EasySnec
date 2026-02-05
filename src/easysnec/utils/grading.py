@@ -58,7 +58,7 @@ class InputData:
         return min(courses, key=lambda course: damerau_levenshtein_distance(self.stations, course.stations))
 
     
-    def score_against(self, course:Course, score_type:ScoreType=2):
+    def score_against(self, course:Course, score_type:ScoreType=ScoreType.ANIMAL_O):
         return Grade(self, course, score_type)
 
 
@@ -99,18 +99,18 @@ class Grade:
 
 
     @cached_property
-    def missed_checkpoints(self) -> list[int]:
+    def missed_checkpoints(self) -> list[str]:
         if self.status is SuccessStatus.SUCCESS:
             return []
-        missed_checkpoints = [station for station in course.stations if station not in input_data.stations]
-        return [EMOJI_MAPPING[checkpoint] for checkpoint in missed_checkpoints if checkpoint in EMOJI_MAPPING else checkpoint]
+        missed_checkpoints = [station for station in self.course.stations if station not in self.input_data.stations]
+        return [EMOJI_MAPPING.get(checkpoint, str(checkpoint)) for checkpoint in missed_checkpoints]
 
     @cached_property
-    def extra_checkpoints(self) -> list[int]:
+    def extra_checkpoints(self) -> list[str]:
         if self.status is SuccessStatus.SUCCESS:
             return []
-        extra_checkpoints = [station for station in input_data.stations if station not in course.stations]
-        return [EMOJI_MAPPING[checkpoint] for checkpoint in extra_checkpoints if checkpoint in EMOJI_MAPPING else checkpoint]
+        extra_checkpoints = [station for station in self.input_data.stations if station not in self.course.stations]
+        return [EMOJI_MAPPING.get(checkpoint, str(checkpoint)) for checkpoint in extra_checkpoints]
 
     @cached_property
     def scoring_output(self) -> str:
@@ -119,10 +119,10 @@ class Grade:
                 scoring_output = ""
             case SuccessStatus.MISSES:
                 scoring_output = ""
-                    if self.missed_checkpoints:
-                        scoring_output += "Missing checkpoints: " + ", ".join(self.missed_checkpoints) + "\n"
-                    if self.extra_checkpoints:
-                        scoring_output += "Extra checkpoints: " + ", ".join(self.extra_checkpoints)
+                if self.missed_checkpoints:
+                    scoring_output += "Missing checkpoints: " + ", ".join(self.missed_checkpoints) + "\n"
+                if self.extra_checkpoints:
+                    scoring_output += "Extra checkpoints: " + ", ".join(self.extra_checkpoints)
             case SuccessStatus.INCOMPLETE:
                 scoring_output = "Missing start or finish checkpoint!"
             case _:
