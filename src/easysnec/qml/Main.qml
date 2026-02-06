@@ -92,7 +92,7 @@ ApplicationWindow {
             }
 
             Rectangle {
-                Layout.alignment: Qt.AlignHCenter 
+                Layout.alignment: Qt.AlignHCenter
                 color: Qt.rgba(1, 0, 0, 0)
                 Layout.fillHeight: true
                 Layout.preferredWidth: 50 // TODO this should be implicit
@@ -150,13 +150,14 @@ ApplicationWindow {
 
 
                 RowLayout {
-                    RowLayout {
-                        Label {
-                            text: "Course Set:"
-                        }
-                        ComboBox {
-                            model: ["Builtins", "Load from File"]
-                        }
+                    Layout.alignment: Qt.AlignBottom
+
+                    ComboBox {
+                        textRole: "display"
+                        model: backend.ports
+                        // background: Rectangle {
+                        //     color: root.connected ? '#65c15a':'#a83434'
+                        // }
                     }
 
                     RowLayout {
@@ -167,14 +168,15 @@ ApplicationWindow {
                             model: ["Score-O", "Animal-O"]
                         }
                     }
-
-                    ComboBox {
-                        textRole: "display"
-                        model: backend.ports
-                        // background: Rectangle {
-                        //     color: root.connected ? '#65c15a':'#a83434'
-                        // }
+                    RowLayout {
+                        Label {
+                            text: "Course Set:"
+                        }
+                        ComboBox {
+                            model: ["Builtins", "Load from File"]
+                        }
                     }
+
 
                     Button {
                         text: "Start"
@@ -241,16 +243,6 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                     padding: 10
                 }
-                // Label {
-                //     color: "#15af15"
-                //     // text: root.cardReading
-                //     font.pointSize: 17
-                //     font.bold: true
-                //     font.family: "Arial"
-                //     renderType: Text.NativeRendering
-                //     horizontalAlignment: Text.AlignHCenter
-                //     padding: 10
-                // }
             }
         }
     }
