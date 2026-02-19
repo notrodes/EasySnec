@@ -18,12 +18,9 @@ from PySide6.QtCore import (
     Property,
 )
 
-from .utils.grading import COURSES, InputData, Grade, SuccessStatus, ScoreType
+from .utils.grading import COURSES, InputData, SuccessStatus
 
 from enum import Enum
-from functools import partial
-
-# from warnings import DeprecationWarning
 
 
 class BackendInterfacePython:
@@ -60,13 +57,14 @@ class BackendInterface(QObject):
         pass
 
     @Signal
-    def try_connect_to_si_reader(self): pass
-    
+    def try_connect_to_si_reader(self):
+        pass
+
     @Slot()
     def ping_port(self):
-        log.info('pinging port')
+        log.info("pinging port")
         self.try_connect_to_si_reader.emit()
-    
+
     # --- logging slot
     @Slot(str)
     def log(self, string: str):
@@ -130,8 +128,11 @@ class BackendInterface(QObject):
 
     selectedPortChanged = Signal(str)
     selectedPort = Property(
-        str, get_selected_port, set_selected_port, notify=selectedPortChanged
-    )  # ty: ignore[invalid-argument-type]
+        str,
+        get_selected_port,
+        set_selected_port,
+        notify=selectedPortChanged,  # ty: ignore[invalid-argument-type]
+    )
 
     # --- scoring mode property (rw)
     _scoring_mode = None
@@ -149,8 +150,8 @@ class BackendInterface(QObject):
         DummyClass.BackendScoreType,
         get_scoring_mode,
         set_scoring_mode,
-        notify=scoringModeChanged,
-    )  # ty: ignore[invalid-argument-type]
+        notify=scoringModeChanged,  # ty: ignore[invalid-argument-type]
+    )
 
     # --- course set property (rw)
     _course_set = ""
@@ -196,13 +197,15 @@ class Backend:
         self.backend_interface.backend_started.connect(self.reader_worker.spin_thread)
 
         def get_reader():
-            log.info('attempting to get port')
+            log.info("attempting to get port")
             # TODO: retry
             for _ in range(10):
                 try:
                     log.info(self.backend_interface._selected_port)
-                    self.reader_worker.si_reader = SIReaderReadout(self.backend_interface._selected_port)
-                    log.success('connected !')
+                    self.reader_worker.si_reader = SIReaderReadout(
+                        self.backend_interface._selected_port
+                    )
+                    log.success("connected !")
                     self.reader_worker.si_is_ready = True
                     return
                 except SIReaderException:
@@ -213,19 +216,20 @@ class Backend:
         # self.backend_interface.selectedPortChanged.connect(self.backend_interface.try_connect_to_si_reader)
         self.backend_interface.try_connect_to_si_reader.connect(get_reader)
 
-
         # --- create our debug timer
         def update_time():
             # Pass the current time to QML.
             current_time = time.strftime("%H:%M:%S", time.localtime())
             self.backend_interface.set_time(current_time)
 
-            current_ports = QStringListModel([port.device for port in serial.tools.list_ports.comports()])
+            current_ports = QStringListModel(
+                [port.device for port in serial.tools.list_ports.comports()]
+            )
             self.backend_interface.set_ports(current_ports)
 
-        self.timer = QTimer(interval=100) # msecs
+        self.timer = QTimer(interval=100)  # msecs
         self.timer.timeout.connect(update_time)
-        
+
     def start(self):
         self.backend_interface.backend_started.emit()
         self.timer.start()
@@ -235,7 +239,6 @@ class Backend:
         self.reader.terminate()
         self.timer.stop()
         log.success("threads safely stopped")
-
 
     # --- nested classes
     class ReaderWorker(QObject):
@@ -247,9 +250,7 @@ class Backend:
             self.si_is_ready = False
             self.si_reader = None
 
-            log.info('reader worker created')
-
-
+            log.info("reader worker created")
 
         def spin_thread(self):
             log.info("starting si loop...")
@@ -275,12 +276,12 @@ class Backend:
 
                 # beep
                 self.si_reader.ack_sicard()
-                
+
                 # when multiple courses are available, get_closest_course before grading
                 best_guess_course = input_data.get_closest_course(COURSES)
                 # runner_grade = input_data.score_against(best_guess_course, ScoreType( self.backend.backend_interface.scoringMode))
                 runner_grade = input_data.score_against(
-                  best_guess_course, BackendInterface.scoringMode
+                    best_guess_course, BackendInterface.scoringMode
                 )
 
                 log.info("Correctness: " + pprint.pformat(runner_grade.status))
